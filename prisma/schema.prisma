@@ -100,6 +100,7 @@ model Product {
 
   name       String
   price      Decimal
+  quantity   Int     @default(1)
   isFeatured Boolean @default(false)
   isArchived Boolean @default(false)
 

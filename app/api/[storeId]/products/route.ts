@@ -13,6 +13,7 @@ export async function POST(
     const {
       name,
       price,
+      quantity,
       categoryId,
       colorId,
       sizeId,
@@ -68,6 +69,7 @@ export async function POST(
       data: {
         name,
         price,
+        quantity,
         categoryId,
         colorId,
         sizeId,

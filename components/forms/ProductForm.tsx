@@ -48,6 +48,7 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Required" }),
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
+  quantity: z.coerce.number().min(0),
   categoryId: z.string().min(1, { message: "Required" }),
   colorId: z.string().min(4, { message: "Required" }),
   sizeId: z.string().min(1, { message: "Required" }),
@@ -78,6 +79,7 @@ const ProductForm = ({ initialData, categories, colors, sizes }: Props) => {
           name: "",
           images: [],
           price: 0,
+          quantity: 1,
           categoryId: "",
           colorId: "",
           sizeId: "",
@@ -214,6 +216,27 @@ const ProductForm = ({ initialData, categories, colors, sizes }: Props) => {
                       type="number"
                       disabled={isLoading}
                       placeholder="250.00"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Quantity<span className="text-rose-500 ml-1">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={isLoading}
+                      placeholder="5"
                       {...field}
                     />
                   </FormControl>
