@@ -10,6 +10,7 @@ export type ProductColumn = {
   id: string;
   name: string;
   price: string;
+  quantity: number;
   size: string;
   category: string;
   color: string;
@@ -117,7 +118,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="flex items-center gap-x-2">
+      <div className="flex items-center justify-between gap-x-2">
         {row.original.color}
         <div
           className="h-6 w-6 rounded-full border"
@@ -125,6 +126,20 @@ export const columns: ColumnDef<ProductColumn>[] = [
         />
       </div>
     ),
+  },
+  {
+    accessorKey: "quantity",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Quantity
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "createdAt",

@@ -3,10 +3,10 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe";
-import prismadb from "@/lib/prismadb";
+import db from "@/lib/prismadb";
 
 export async function POST(req: Request) {
-  const body = await req.text();
+  const body = await req.json();
   const signature = headers().get("Stripe-Signature") as string;
 
   let event: Stripe.Event;
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
   const addressString = addressComponents.filter((c) => c !== null).join(", ");
 
   if (event.type === "checkout.session.completed") {
-    const order = await prismadb.order.update({
+    console.log("Updating order");
+    const order = await db.order.update({
       where: {
         id: session?.metadata?.orderId,
       },
@@ -50,18 +51,54 @@ export async function POST(req: Request) {
       },
     });
 
-    const productIds = order.orderItems.map((orderItem) => orderItem.productId);
+    console.log("Updated order");
 
-    await prismadb.product.updateMany({
-      where: {
-        id: {
-          in: [...productIds],
-        },
-      },
-      data: {
-        isArchived: true,
-      },
-    });
+    console.log("Data is: ", session?.metadata?.data);
+
+    const data = (session?.metadata?.data || []) as {
+      id: string;
+      quantity: number;
+    }[];
+
+    console.log("Dets: ", data);
+
+    data.forEach(
+      async (item) =>
+        await db.product.update({
+          where: {
+            id: item.id,
+          },
+          data: {
+            quantity: item.quantity,
+          },
+        })
+    );
+
+    // for (const item of data) {
+    //   console.log(item);
+
+    //   await db.product.update({
+    //     where: {
+    //       id: item.id,
+    //     },
+    //     data: {
+    //       quantity: item.quantity,
+    //     },
+    //   });
+    // }
+
+    // await db.product.updateMany({
+    //   where: {
+    //     id: {
+    //       in: [...productIds],
+    //     },
+    //   },
+    //   data: {
+    //     quantity: quantities.
+    //   },
+    // });
+
+    console.log("Finished");
   }
 
   return new NextResponse(null, { status: 200 });

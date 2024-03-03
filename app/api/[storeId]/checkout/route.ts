@@ -18,10 +18,14 @@ export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
 ) {
-  const { productIds } = await req.json();
+  const { productIds, data } = await req.json();
 
   if (!productIds || productIds.length === 0) {
     return new NextResponse("Product ids are required", { status: 400 });
+  }
+
+  if (!data || data.length === 0) {
+    return new NextResponse("Quantities are required", { status: 400 });
   }
 
   const products = await db.product.findMany({
@@ -34,15 +38,15 @@ export async function POST(
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-  products.forEach((product) => {
+  data.forEach((product: any) => {
     line_items.push({
-      quantity: 1,
+      quantity: product.quantity,
       price_data: {
         currency: "INR",
         product_data: {
           name: product.name,
         },
-        unit_amount: product.price.toNumber() * 100,
+        unit_amount: Number(product.price) * 100,
       },
     });
   });
@@ -52,16 +56,38 @@ export async function POST(
       storeId: params.storeId,
       isPaid: false,
       orderItems: {
-        create: productIds.map((productId: string) => ({
-          product: {
-            connect: {
-              id: productId,
-            },
-          },
+        create: data.map((product: any) => ({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: product.quantity,
         })),
       },
     },
   });
+
+  // const order = await db.order.create({
+  //   data: {
+  //     storeId: params.storeId,
+  //     isPaid: false,
+  //     orderItems: {
+  //       create: productIds.map((productId: string) => ({
+  //         product: {
+  //           connect: {
+  //             id: productId,
+  //           },
+  //         },
+  //       })),
+  //     },
+  //   },
+  // });
+
+  const newProductData = data.map((item: any) => ({
+    id: item.id,
+    quantity: item.maxQty - item.quantity,
+  }));
+
+  console.log(newProductData);
 
   const session = await stripe.checkout.sessions.create({
     line_items,
@@ -74,6 +100,7 @@ export async function POST(
     cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
     metadata: {
       orderId: order.id,
+      data: JSON.stringify(newProductData),
     },
   });
 

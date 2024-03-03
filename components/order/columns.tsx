@@ -4,7 +4,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 
 import { ArrowUpDown } from "lucide-react";
-import CellAction from "@/components/billboard/CellAction";
 
 export type OrderColumn = {
   id: string;
