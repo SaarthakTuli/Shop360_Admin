@@ -17,15 +17,11 @@ interface Props {
 }
 
 const DashboardPage = async ({ params }: Props) => {
-  // const totalRevenue = await getTotalRevenue(params.storeId);
-  // const salesCount = await getSalesCount(params.storeId);
-  // const stockCount = await getStockCount(params.storeId);
+  const totalRevenue = await getTotalRevenue(params.storeId);
+  const salesCount = await getSalesCount(params.storeId);
+  const stockCount = await getStockCount(params.storeId);
 
-  const totalRevenue = 100;
-  const salesCount = 4;
-  const stockCount = 2;
-
-  // const graphRevenue = await getGraphRevenue(params.storeId);
+  const graphRevenue = await getGraphRevenue(params.storeId);
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -79,7 +75,7 @@ const DashboardPage = async ({ params }: Props) => {
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            {/* <Overview data={graphRevenue} /> */}
+            <Overview data={graphRevenue} />
           </CardContent>
         </Card>
       </div>
