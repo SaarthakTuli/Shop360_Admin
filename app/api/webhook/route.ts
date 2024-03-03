@@ -24,6 +24,8 @@ export async function POST(req: Request) {
   const session = event.data.object as Stripe.Checkout.Session;
   const address = session?.customer_details?.address;
 
+  console.log("Data is: ", session?.metadata?.data);
+
   const addressComponents = [
     address?.line1,
     address?.line2,
@@ -34,6 +36,8 @@ export async function POST(req: Request) {
   ];
 
   const addressString = addressComponents.filter((c) => c !== null).join(", ");
+
+  console.log("Event is: ", event.type);
 
   if (event.type === "checkout.session.completed") {
     console.log("Updating order");
@@ -55,15 +59,24 @@ export async function POST(req: Request) {
 
     console.log("Data is: ", session?.metadata?.data);
 
-    const data = (session?.metadata?.data || []) as {
-      id: string;
-      quantity: number;
-    }[];
+    const data = session?.metadata?.data || "[]";
 
-    console.log("Dets: ", data);
+    const productData = JSON.parse(data);
 
-    data.forEach(
-      async (item) =>
+    // productData.map(
+    //   async (item: any) =>
+    //     await db.product.update({
+    //       where: {
+    //         id: item.id,
+    //       },
+    //       data: {
+    //         quantity: item.quantity,
+    //       },
+    //     })
+    // );
+
+    const finalProduct = productData.forEach(
+      async (item: any) =>
         await db.product.update({
           where: {
             id: item.id,
@@ -73,6 +86,8 @@ export async function POST(req: Request) {
           },
         })
     );
+
+    console.log(finalProduct);
 
     // for (const item of data) {
     //   console.log(item);
